@@ -2,8 +2,6 @@
 
 import { useState } from "react";
 
-const FORM_NAME = "contact";
-
 export function ContactForm({ defaultOrderType = "" }: { defaultOrderType?: string }) {
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -15,24 +13,21 @@ export function ContactForm({ defaultOrderType = "" }: { defaultOrderType?: stri
     setSubmitting(true);
 
     const form = e.currentTarget;
-    const body = new URLSearchParams();
     const data = new FormData(form);
 
+    // Convert FormData to JSON object
+    const json: Record<string, string> = {};
     for (const [key, value] of data.entries()) {
       if (typeof value === "string") {
-        body.append(key, value);
+        json[key] = value;
       }
     }
 
-    if (!body.has("form-name")) {
-      body.append("form-name", FORM_NAME);
-    }
-
     try {
-      const response = await fetch("/", {
+      const response = await fetch("/.netlify/functions/contact", {
         method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: body.toString(),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(json),
       });
 
       if (response.ok) {
@@ -45,7 +40,7 @@ export function ContactForm({ defaultOrderType = "" }: { defaultOrderType?: stri
       }
     } catch {
       setError(
-        "We could not send your request. Check your connection or try again after deploy (forms work on Netlify).",
+        "We could not send your request. Check your connection or try again after deploy.",
       );
     } finally {
       setSubmitting(false);
@@ -71,20 +66,9 @@ export function ContactForm({ defaultOrderType = "" }: { defaultOrderType?: stri
 
   return (
     <form
-      name={FORM_NAME}
-      method="POST"
-      action="/"
-      data-netlify="true"
-      data-netlify-honeypot="bot-field"
       onSubmit={handleSubmit}
       className="rounded-2xl border border-border/80 bg-white p-6 shadow-sm ring-1 ring-border/40 sm:p-8"
     >
-      <input type="hidden" name="form-name" value={FORM_NAME} />
-      <p className="hidden" aria-hidden="true">
-        <label>
-          Don’t fill this out: <input name="bot-field" tabIndex={-1} autoComplete="off" />
-        </label>
-      </p>
 
       <p className="mb-6 rounded-lg bg-cream-dark px-4 py-3 text-sm text-brown-light">
         <strong className="text-brown">Custom orders welcome.</strong> Tell us
