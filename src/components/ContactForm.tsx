@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ordersStorage } from "@/lib/ordersStorage";
 
 export function ContactForm({ defaultOrderType = "" }: { defaultOrderType?: string }) {
   const [submitted, setSubmitted] = useState(false);
@@ -31,6 +32,17 @@ export function ContactForm({ defaultOrderType = "" }: { defaultOrderType?: stri
       });
 
       if (response.ok) {
+        const result = await response.json();
+        
+        // Store order in localStorage for admin dashboard
+        const order = {
+          id: result.orderId || Date.now(),
+          timestamp: new Date().toISOString(),
+          status: "pending",
+          ...json,
+        };
+        ordersStorage.add(order);
+        
         setSubmitted(true);
         form.reset();
       } else {

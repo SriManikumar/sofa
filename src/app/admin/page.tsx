@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { PageHero } from "@/components/PageHero";
+import { ordersStorage } from "@/lib/ordersStorage";
 
 type Order = {
   id: number;
@@ -29,43 +30,33 @@ export default function AdminPage() {
 
   const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || "1234";
 
+  useEffect(() => {
+    // Auto-refresh orders every 3 seconds when authenticated
+    if (authenticated) {
+      const interval = setInterval(() => {
+        const stored = ordersStorage.get();
+        setOrders(stored);
+      }, 3000);
+      return () => clearInterval(interval);
+    }
+  }, [authenticated]);
+
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     if (password === ADMIN_PASSWORD) {
       setAuthenticated(true);
-      fetchOrders();
+      const stored = ordersStorage.get();
+      setOrders(stored);
       setPassword("");
-      
-      // Auto-refresh orders every 5 seconds
-      const interval = setInterval(fetchOrders, 5000);
-      return () => clearInterval(interval);
     } else {
       alert("Invalid password");
       setPassword("");
     }
   };
 
-  const fetchOrders = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch("/.netlify/functions/contact");
-      if (response.ok) {
-        const data = await response.json();
-        setOrders(data.orders || []);
-      }
-    } catch (error) {
-      console.error("Error fetching orders:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const updateOrderStatus = async (orderId: number, newStatus: Order["status"]) => {
-    setOrders(
-      orders.map((order) =>
-        order.id === orderId ? { ...order, status: newStatus } : order
-      )
-    );
+    const updated = ordersStorage.update(orderId, { status: newStatus });
+    setOrders(updated);
   };
 
   const filteredOrders = orders.filter(
@@ -155,22 +146,12 @@ export default function AdminPage() {
           </button>
         </div>
 
-        {loading ? (
-          <div className="text-center py-12">
-            <p className="text-muted">Loading orders...</p>
-          </div>
-        ) : filteredOrders.length === 0 ? (
+        {filteredOrders.length === 0 ? (
           <div className="rounded-2xl border border-border/50 bg-cream-dark p-12 text-center">
             <p className="text-muted text-lg">📭 No orders yet</p>
             <p className="text-sm text-muted/60 mt-2">
-              Orders will appear here when customers submit the contact form
+              Orders will appear here when customers submit the contact form on this browser
             </p>
-            <button
-              onClick={fetchOrders}
-              className="mt-4 px-4 py-2 text-sm bg-charcoal text-cream rounded-lg hover:bg-brown-light transition-colors"
-            >
-              Refresh now
-            </button>
           </div>
         ) : (
           <div className="space-y-4">
@@ -267,17 +248,21 @@ export default function AdminPage() {
 
         <div className="mt-12 rounded-xl border border-gold/30 bg-champagne/50 p-6">
           <h3 className="font-display font-semibold text-charcoal mb-2">
-            ✅ Netlify-Only Setup
+            ✅ Browser Storage
           </h3>
           <p className="text-sm text-muted mb-3">
-            Orders are stored and visible here. This page auto-refreshes every 5 seconds.
+            Orders are stored on your browser using localStorage. They persist as long as you keep the site open.
           </p>
           <ul className="space-y-2 text-sm text-muted list-disc list-inside">
-            <li>Orders appear here when customers submit the contact form</li>
-            <li>Click an order to see full details and change its status</li>
-            <li>Orders persist during this session</li>
-            <li>To store orders permanently, upgrade to Supabase or Firebase</li>
+            <li>Orders appear instantly when customers submit forms</li>
+            <li>Click an order to see full details and update status</li>
+            <li>Auto-refreshes every 3 seconds</li>
+            <li>Orders persist during this session (browser storage)</li>
+            <li>If you close the browser, you can still check Netlify Function logs</li>
           </ul>
+          <p className="mt-3 text-xs text-muted/60 border-t border-gold/20 pt-3">
+            <strong>Want permanent cloud storage?</strong> Upgrade to Firebase or Supabase for persistent order history.
+          </p>
         </div>
       </div>
     </>
