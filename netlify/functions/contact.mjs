@@ -3,7 +3,7 @@
  * Stores orders in memory and serves them via GET (for admin dashboard)
  */
 
-// In-memory storage (persists during function warm time)
+// In-memory storage
 let ordersStorage = [];
 
 export default async (event, context) => {
@@ -16,33 +16,27 @@ export default async (event, context) => {
 
   // Handle OPTIONS (preflight) requests
   if (event.httpMethod === "OPTIONS") {
-    return {
-      statusCode: 200,
-      headers,
-      body: "OK",
-    };
+    return new Response("OK", { status: 200, headers });
   }
 
-  // Handle GET requests - return stored orders (for admin dashboard)
+  // Handle GET requests - return stored orders
   if (event.httpMethod === "GET") {
-    return {
-      statusCode: 200,
-      headers,
-      body: JSON.stringify({
+    return new Response(
+      JSON.stringify({
         success: true,
         orders: ordersStorage,
         count: ordersStorage.length,
       }),
-    };
+      { status: 200, headers }
+    );
   }
 
   // Handle POST requests - create new order
   if (event.httpMethod !== "POST") {
-    return {
-      statusCode: 405,
-      headers,
-      body: JSON.stringify({ error: "Method not allowed" }),
-    };
+    return new Response(
+      JSON.stringify({ error: "Method not allowed" }),
+      { status: 405, headers }
+    );
   }
 
   try {
@@ -51,11 +45,10 @@ export default async (event, context) => {
       body = event.body ? JSON.parse(event.body) : {};
     } catch (parseError) {
       console.error("JSON parse error:", parseError);
-      return {
-        statusCode: 400,
-        headers,
-        body: JSON.stringify({ error: "Invalid JSON in request body" }),
-      };
+      return new Response(
+        JSON.stringify({ error: "Invalid JSON in request body" }),
+        { status: 400, headers }
+      );
     }
 
     const {
@@ -73,11 +66,10 @@ export default async (event, context) => {
 
     // Validate required fields
     if (!name || !phone || !orderType) {
-      return {
-        statusCode: 400,
-        headers,
-        body: JSON.stringify({ error: "Missing required fields: name, phone, orderType" }),
-      };
+      return new Response(
+        JSON.stringify({ error: "Missing required fields: name, phone, orderType" }),
+        { status: 400, headers }
+      );
     }
 
     // Create order object
@@ -107,23 +99,21 @@ export default async (event, context) => {
 
     console.log("✅ ORDER #" + order.id + " from " + name);
 
-    return {
-      statusCode: 200,
-      headers,
-      body: JSON.stringify({
+    return new Response(
+      JSON.stringify({
         success: true,
         orderId: order.id,
         message: "Thank you! Your order has been received. We'll contact you within 24 hours.",
       }),
-    };
+      { status: 200, headers }
+    );
   } catch (error) {
     console.error("❌ Function error:", error);
-    return {
-      statusCode: 500,
-      headers,
-      body: JSON.stringify({ 
+    return new Response(
+      JSON.stringify({ 
         error: "Internal server error: " + (error instanceof Error ? error.message : "Unknown") 
       }),
-    };
+      { status: 500, headers }
+    );
   }
 };
