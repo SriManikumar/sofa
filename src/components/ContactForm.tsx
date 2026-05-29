@@ -29,7 +29,7 @@ export function ContactForm({ defaultOrderType = "" }: { defaultOrderType?: stri
     }
 
     try {
-      const response = await fetch("/", {
+      const response = await fetch("/.netlify/functions/submission", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: body.toString(),
