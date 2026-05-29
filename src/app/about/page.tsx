@@ -4,6 +4,7 @@ import Link from "next/link";
 import { PageHero } from "@/components/PageHero";
 import { SectionHeading } from "@/components/SectionHeading";
 import { TrustSignals } from "@/components/TrustSignals";
+import { siteImages } from "@/data/images";
 import { site } from "@/data/site";
 
 export const metadata: Metadata = {
@@ -46,7 +47,7 @@ export default function AboutPage() {
         <div className="grid items-center gap-14 lg:grid-cols-2">
           <div className="relative aspect-[4/3] overflow-hidden rounded-2xl shadow-xl ring-1 ring-border/60">
             <Image
-              src="https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=1200&q=85"
+              src={siteImages.workshop}
               alt="Sree Recliners and Sofas manufacturing workshop"
               fill
               className="object-cover"
