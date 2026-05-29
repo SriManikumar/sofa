@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Netlify form detection</title>
+  </head>
+  <body>
+    <!--
+      Hidden form for Netlify build-time detection (Next.js App Router).
+      Field names must match ContactForm.tsx. Do not remove.
+    -->
+    <form
+      name="contact"
+      method="POST"
+      action="/"
+      data-netlify="true"
+      data-netlify-honeypot="bot-field"
+      hidden
+    >
+      <input type="hidden" name="form-name" value="contact" />
+      <p>
+        <label>
+          Don’t fill this out if you’re human:
+          <input name="bot-field" />
+        </label>
+      </p>
+      <input type="text" name="name" />
+      <input type="tel" name="phone" />
+      <input type="email" name="email" />
+      <input type="text" name="orderType" />
+      <input type="text" name="reclinerType" />
+      <input type="number" name="quantity" />
+      <input type="text" name="dimensions" />
+      <input type="text" name="fabric" />
+      <input type="text" name="delivery" />
+      <textarea name="message"></textarea>
+    </form>
+  </body>
+</html>

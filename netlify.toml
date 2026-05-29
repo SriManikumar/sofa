@@ -1,0 +1,9 @@
+# Sree Recliners and Sofas — Next.js on Netlify
+# https://docs.netlify.com/build/frameworks/framework-setup-guides/nextjs/overview/
+
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"

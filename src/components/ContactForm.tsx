@@ -2,12 +2,54 @@
 
 import { useState } from "react";
 
+const FORM_NAME = "contact";
+
 export function ContactForm({ defaultOrderType = "" }: { defaultOrderType?: string }) {
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setSubmitted(true);
+    setError(null);
+    setSubmitting(true);
+
+    const form = e.currentTarget;
+    const body = new URLSearchParams();
+    const data = new FormData(form);
+
+    for (const [key, value] of data.entries()) {
+      if (typeof value === "string") {
+        body.append(key, value);
+      }
+    }
+
+    if (!body.has("form-name")) {
+      body.append("form-name", FORM_NAME);
+    }
+
+    try {
+      const response = await fetch("/", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: body.toString(),
+      });
+
+      if (response.ok) {
+        setSubmitted(true);
+        form.reset();
+      } else {
+        setError(
+          "We could not send your request. Please try again or call us directly.",
+        );
+      }
+    } catch {
+      setError(
+        "We could not send your request. Check your connection or try again after deploy (forms work on Netlify).",
+      );
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   if (submitted) {
@@ -29,14 +71,35 @@ export function ContactForm({ defaultOrderType = "" }: { defaultOrderType?: stri
 
   return (
     <form
+      name={FORM_NAME}
+      method="POST"
+      action="/"
+      data-netlify="true"
+      data-netlify-honeypot="bot-field"
       onSubmit={handleSubmit}
       className="rounded-2xl border border-border bg-white p-6 shadow-sm sm:p-8"
     >
+      <input type="hidden" name="form-name" value={FORM_NAME} />
+      <p className="hidden" aria-hidden="true">
+        <label>
+          Don’t fill this out: <input name="bot-field" tabIndex={-1} autoComplete="off" />
+        </label>
+      </p>
+
       <p className="mb-6 rounded-lg bg-cream-dark px-4 py-3 text-sm text-brown-light">
         <strong className="text-brown">Custom orders welcome.</strong> Tell us
         your dimensions, fabric preference, recliner type, quantity, and
         delivery location — we&apos;ll prepare a personalized quote.
       </p>
+
+      {error ? (
+        <p
+          className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
+          role="alert"
+        >
+          {error}
+        </p>
+      ) : null}
 
       <div className="grid gap-5 sm:grid-cols-2">
         <div>
@@ -48,7 +111,8 @@ export function ContactForm({ defaultOrderType = "" }: { defaultOrderType?: stri
             name="name"
             type="text"
             required
-            className="mt-1.5 w-full rounded-lg border border-border bg-cream px-4 py-2.5 text-sm outline-none focus:border-accent focus:ring-1 focus:ring-accent"
+            disabled={submitting}
+            className="mt-1.5 w-full rounded-lg border border-border bg-cream px-4 py-2.5 text-sm outline-none focus:border-accent focus:ring-1 focus:ring-accent disabled:opacity-60"
             placeholder="Your name"
           />
         </div>
@@ -61,7 +125,8 @@ export function ContactForm({ defaultOrderType = "" }: { defaultOrderType?: stri
             name="phone"
             type="tel"
             required
-            className="mt-1.5 w-full rounded-lg border border-border bg-cream px-4 py-2.5 text-sm outline-none focus:border-accent focus:ring-1 focus:ring-accent"
+            disabled={submitting}
+            className="mt-1.5 w-full rounded-lg border border-border bg-cream px-4 py-2.5 text-sm outline-none focus:border-accent focus:ring-1 focus:ring-accent disabled:opacity-60"
             placeholder="+91 ..."
           />
         </div>
@@ -73,7 +138,8 @@ export function ContactForm({ defaultOrderType = "" }: { defaultOrderType?: stri
             id="email"
             name="email"
             type="email"
-            className="mt-1.5 w-full rounded-lg border border-border bg-cream px-4 py-2.5 text-sm outline-none focus:border-accent focus:ring-1 focus:ring-accent"
+            disabled={submitting}
+            className="mt-1.5 w-full rounded-lg border border-border bg-cream px-4 py-2.5 text-sm outline-none focus:border-accent focus:ring-1 focus:ring-accent disabled:opacity-60"
             placeholder="you@email.com"
           />
         </div>
@@ -87,7 +153,8 @@ export function ContactForm({ defaultOrderType = "" }: { defaultOrderType?: stri
             name="orderType"
             required
             defaultValue={defaultOrderType}
-            className="mt-1.5 w-full rounded-lg border border-border bg-cream px-4 py-2.5 text-sm outline-none focus:border-accent focus:ring-1 focus:ring-accent"
+            disabled={submitting}
+            className="mt-1.5 w-full rounded-lg border border-border bg-cream px-4 py-2.5 text-sm outline-none focus:border-accent focus:ring-1 focus:ring-accent disabled:opacity-60"
           >
             <option value="">Select order type</option>
             <option value="custom-sofa">Custom sofa (made to measure)</option>
@@ -106,7 +173,8 @@ export function ContactForm({ defaultOrderType = "" }: { defaultOrderType?: stri
           <select
             id="reclinerType"
             name="reclinerType"
-            className="mt-1.5 w-full rounded-lg border border-border bg-cream px-4 py-2.5 text-sm outline-none focus:border-accent focus:ring-1 focus:ring-accent"
+            disabled={submitting}
+            className="mt-1.5 w-full rounded-lg border border-border bg-cream px-4 py-2.5 text-sm outline-none focus:border-accent focus:ring-1 focus:ring-accent disabled:opacity-60"
           >
             <option value="">Not applicable</option>
             <option value="manual">Manual recliner</option>
@@ -126,7 +194,8 @@ export function ContactForm({ defaultOrderType = "" }: { defaultOrderType?: stri
             min={1}
             defaultValue={1}
             required
-            className="mt-1.5 w-full rounded-lg border border-border bg-cream px-4 py-2.5 text-sm outline-none focus:border-accent focus:ring-1 focus:ring-accent"
+            disabled={submitting}
+            className="mt-1.5 w-full rounded-lg border border-border bg-cream px-4 py-2.5 text-sm outline-none focus:border-accent focus:ring-1 focus:ring-accent disabled:opacity-60"
           />
         </div>
 
@@ -138,7 +207,8 @@ export function ContactForm({ defaultOrderType = "" }: { defaultOrderType?: stri
             id="dimensions"
             name="dimensions"
             type="text"
-            className="mt-1.5 w-full rounded-lg border border-border bg-cream px-4 py-2.5 text-sm outline-none focus:border-accent focus:ring-1 focus:ring-accent"
+            disabled={submitting}
+            className="mt-1.5 w-full rounded-lg border border-border bg-cream px-4 py-2.5 text-sm outline-none focus:border-accent focus:ring-1 focus:ring-accent disabled:opacity-60"
             placeholder="e.g. 7 ft × 3 ft × 34 in"
           />
         </div>
@@ -150,7 +220,8 @@ export function ContactForm({ defaultOrderType = "" }: { defaultOrderType?: stri
             id="fabric"
             name="fabric"
             type="text"
-            className="mt-1.5 w-full rounded-lg border border-border bg-cream px-4 py-2.5 text-sm outline-none focus:border-accent focus:ring-1 focus:ring-accent"
+            disabled={submitting}
+            className="mt-1.5 w-full rounded-lg border border-border bg-cream px-4 py-2.5 text-sm outline-none focus:border-accent focus:ring-1 focus:ring-accent disabled:opacity-60"
             placeholder="Leatherette, cotton, velvet..."
           />
         </div>
@@ -164,7 +235,8 @@ export function ContactForm({ defaultOrderType = "" }: { defaultOrderType?: stri
             name="delivery"
             type="text"
             required
-            className="mt-1.5 w-full rounded-lg border border-border bg-cream px-4 py-2.5 text-sm outline-none focus:border-accent focus:ring-1 focus:ring-accent"
+            disabled={submitting}
+            className="mt-1.5 w-full rounded-lg border border-border bg-cream px-4 py-2.5 text-sm outline-none focus:border-accent focus:ring-1 focus:ring-accent disabled:opacity-60"
             placeholder="City, area, pin code"
           />
         </div>
@@ -177,7 +249,8 @@ export function ContactForm({ defaultOrderType = "" }: { defaultOrderType?: stri
             id="message"
             name="message"
             rows={4}
-            className="mt-1.5 w-full resize-none rounded-lg border border-border bg-cream px-4 py-2.5 text-sm outline-none focus:border-accent focus:ring-1 focus:ring-accent"
+            disabled={submitting}
+            className="mt-1.5 w-full resize-none rounded-lg border border-border bg-cream px-4 py-2.5 text-sm outline-none focus:border-accent focus:ring-1 focus:ring-accent disabled:opacity-60"
             placeholder="Room photos, color preferences, budget range, preferred delivery date..."
           />
         </div>
@@ -185,9 +258,10 @@ export function ContactForm({ defaultOrderType = "" }: { defaultOrderType?: stri
 
       <button
         type="submit"
-        className="mt-6 w-full rounded-full bg-accent py-3.5 text-sm font-semibold text-white transition-colors hover:bg-accent-dark sm:w-auto sm:px-10"
+        disabled={submitting}
+        className="mt-6 w-full rounded-full bg-accent py-3.5 text-sm font-semibold text-white transition-colors hover:bg-accent-dark disabled:cursor-not-allowed disabled:opacity-70 sm:w-auto sm:px-10"
       >
-        Submit custom order request
+        {submitting ? "Sending…" : "Submit custom order request"}
       </button>
     </form>
   );
