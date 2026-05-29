@@ -1,14 +1,29 @@
 /**
  * Netlify Function to handle contact form submissions
- * Stores orders and sends email notifications
+ * Stores orders in memory and serves them via GET (for admin dashboard)
  */
 
-// Simple in-memory storage (for demonstration)
-// In production, use Supabase or Firebase
-const orders = [];
+// In-memory storage (persists during function warm time)
+let ordersStorage = [];
 
 export default async (event, context) => {
-  // Only accept POST requests
+  // Handle GET requests - return stored orders (for admin dashboard)
+  if (event.httpMethod === "GET") {
+    return {
+      statusCode: 200,
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+      },
+      body: JSON.stringify({
+        success: true,
+        orders: ordersStorage,
+        count: ordersStorage.length,
+      }),
+    };
+  }
+
+  // Handle POST requests - create new order
   if (event.httpMethod !== "POST") {
     return {
       statusCode: 405,
@@ -36,69 +51,33 @@ export default async (event, context) => {
     const order = {
       id: Date.now(),
       timestamp: new Date().toISOString(),
-      status: "pending", // pending, quoted, completed
+      status: "pending",
       name,
       email,
       phone,
       orderType,
-      reclinerType,
-      quantity,
-      dimensions,
-      fabric,
-      delivery,
-      message,
+      reclinerType: reclinerType || null,
+      quantity: quantity || "1",
+      dimensions: dimensions || null,
+      fabric: fabric || null,
+      delivery: delivery || null,
+      message: message || null,
     };
 
-    // Store in memory (replace with Supabase in production)
-    orders.push(order);
-
-    // Log for Netlify dashboard
-    console.log("📋 New Order #" + order.id, {
-      name,
-      orderType,
-      phone,
-      timestamp: order.timestamp,
-    });
-
-    // Send notification email (to be configured with Resend/SendGrid)
-    const businessEmail = process.env.BUSINESS_EMAIL || "gdurga18@gmail.com";
-
-    // Email template
-    const emailContent = `
-📋 NEW ORDER SUBMISSION
-
-Customer: ${name}
-Phone: ${phone}
-Email: ${email}
-Order Type: ${orderType}
-
-Details:
-- Recliner Type: ${reclinerType || "N/A"}
-- Quantity: ${quantity}
-- Dimensions: ${dimensions || "Not specified"}
-- Fabric: ${fabric || "Not specified"}
-- Delivery: ${delivery || "Not specified"}
-- Message: ${message || "None"}
-
-Time: ${new Date(order.timestamp).toLocaleString()}
-
-🔗 View in admin: ${process.env.SITE_URL || "https://your-site.netlify.app"}/admin
-
-Action: Review requirements and contact within 24 hours
-    `;
-
-    try {
-      // Optional: Send via email service (configure API key in Netlify env)
-      if (process.env.RESEND_API_KEY) {
-        // Will implement Resend in next version
-        console.log("Email service configured");
-      }
-      // Fallback: Just log for now
-      console.log("📧 Would send email to:", businessEmail);
-    } catch (emailError) {
-      console.warn("Email sending failed:", emailError.message);
-      // Don't fail the order if email fails
+    // Store in memory
+    ordersStorage.unshift(order); // Add to beginning
+    
+    // Keep only last 50 orders in memory
+    if (ordersStorage.length > 50) {
+      ordersStorage = ordersStorage.slice(0, 50);
     }
+
+    // Log to Netlify dashboard
+    console.log("✅ NEW ORDER #" + order.id);
+    console.log(`📋 ${order.name} | ${order.orderType}`);
+    console.log(`📞 ${phone} | 📧 ${email}`);
+    console.log(`⏰ ${order.timestamp}`);
+    console.log("---");
 
     return {
       statusCode: 200,
@@ -113,13 +92,10 @@ Action: Review requirements and contact within 24 hours
       }),
     };
   } catch (error) {
-    console.error("Error processing form:", error);
+    console.error("❌ Error processing form:", error);
     return {
       statusCode: 500,
       body: JSON.stringify({ error: "Failed to process submission" }),
     };
   }
 };
-
-// For testing - return stored orders
-export const getOrders = () => orders;

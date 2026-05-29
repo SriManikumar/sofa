@@ -35,6 +35,10 @@ export default function AdminPage() {
       setAuthenticated(true);
       fetchOrders();
       setPassword("");
+      
+      // Auto-refresh orders every 5 seconds
+      const interval = setInterval(fetchOrders, 5000);
+      return () => clearInterval(interval);
     } else {
       alert("Invalid password");
       setPassword("");
@@ -44,11 +48,11 @@ export default function AdminPage() {
   const fetchOrders = async () => {
     setLoading(true);
     try {
-      // For now, orders are stored in Netlify Functions logs
-      // In production, fetch from Supabase or your database
-      console.log("📥 Fetching orders...");
-      // Placeholder - will connect to real database
-      setOrders([]);
+      const response = await fetch("/.netlify/functions/contact");
+      if (response.ok) {
+        const data = await response.json();
+        setOrders(data.orders || []);
+      }
     } catch (error) {
       console.error("Error fetching orders:", error);
     } finally {
@@ -157,10 +161,16 @@ export default function AdminPage() {
           </div>
         ) : filteredOrders.length === 0 ? (
           <div className="rounded-2xl border border-border/50 bg-cream-dark p-12 text-center">
-            <p className="text-muted">No orders yet</p>
+            <p className="text-muted text-lg">📭 No orders yet</p>
             <p className="text-sm text-muted/60 mt-2">
-              Orders will appear here once customers submit the contact form
+              Orders will appear here when customers submit the contact form
             </p>
+            <button
+              onClick={fetchOrders}
+              className="mt-4 px-4 py-2 text-sm bg-charcoal text-cream rounded-lg hover:bg-brown-light transition-colors"
+            >
+              Refresh now
+            </button>
           </div>
         ) : (
           <div className="space-y-4">
@@ -257,37 +267,17 @@ export default function AdminPage() {
 
         <div className="mt-12 rounded-xl border border-gold/30 bg-champagne/50 p-6">
           <h3 className="font-display font-semibold text-charcoal mb-2">
-            🚀 Next Steps
+            ✅ Netlify-Only Setup
           </h3>
-          <ol className="space-y-2 text-sm text-muted">
-            <li>
-              <strong>1. Email Setup:</strong> Get a{" "}
-              <a
-                href="https://resend.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-accent hover:underline"
-              >
-                Resend
-              </a>{" "}
-              API key and add it to Netlify env variables
-            </li>
-            <li>
-              <strong>2. Database:</strong> Set up{" "}
-              <a
-                href="https://supabase.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-accent hover:underline"
-              >
-                Supabase
-              </a>{" "}
-              to persist orders
-            </li>
-            <li>
-              <strong>3. Connect:</strong> Update the Netlify Function to use your database
-            </li>
-          </ol>
+          <p className="text-sm text-muted mb-3">
+            Orders are stored and visible here. This page auto-refreshes every 5 seconds.
+          </p>
+          <ul className="space-y-2 text-sm text-muted list-disc list-inside">
+            <li>Orders appear here when customers submit the contact form</li>
+            <li>Click an order to see full details and change its status</li>
+            <li>Orders persist during this session</li>
+            <li>To store orders permanently, upgrade to Supabase or Firebase</li>
+          </ul>
         </div>
       </div>
     </>
