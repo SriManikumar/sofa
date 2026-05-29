@@ -18,13 +18,13 @@ export function Header() {
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border bg-cream/95 backdrop-blur-sm">
+    <header className="sticky top-0 z-50 border-b border-border/80 bg-cream/90 backdrop-blur-md">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
         <Link href="/" className="group">
-          <span className="font-display text-xl font-semibold text-brown sm:text-2xl">
+          <span className="font-display text-xl font-semibold text-charcoal sm:text-2xl">
             {site.name}
           </span>
-          <span className="mt-0.5 block text-xs tracking-widest text-muted uppercase">
+          <span className="mt-0.5 block text-[0.65rem] tracking-[0.2em] text-muted uppercase">
             Recliners &amp; Custom Sofas
           </span>
         </Link>
@@ -54,7 +54,7 @@ export function Header() {
           </a>
           <Link
             href="/contact"
-            className="rounded-full bg-brown px-5 py-2.5 text-sm font-medium text-cream transition-colors hover:bg-brown-light"
+            className="rounded-full bg-charcoal px-5 py-2.5 text-sm font-medium text-cream shadow-sm transition-colors hover:bg-brown-light"
           >
             Order Custom
           </Link>
@@ -68,13 +68,13 @@ export function Header() {
           onClick={() => setOpen(!open)}
         >
           <span
-            className={`block h-0.5 w-6 bg-brown transition-transform ${open ? "translate-y-2 rotate-45" : ""}`}
+            className={`block h-0.5 w-6 bg-charcoal transition-transform ${open ? "translate-y-2 rotate-45" : ""}`}
           />
           <span
-            className={`block h-0.5 w-6 bg-brown transition-opacity ${open ? "opacity-0" : ""}`}
+            className={`block h-0.5 w-6 bg-charcoal transition-opacity ${open ? "opacity-0" : ""}`}
           />
           <span
-            className={`block h-0.5 w-6 bg-brown transition-transform ${open ? "-translate-y-2 -rotate-45" : ""}`}
+            className={`block h-0.5 w-6 bg-charcoal transition-transform ${open ? "-translate-y-2 -rotate-45" : ""}`}
           />
         </button>
       </div>
@@ -102,7 +102,7 @@ export function Header() {
             <Link
               href="/contact"
               onClick={() => setOpen(false)}
-              className="mt-2 rounded-full bg-brown py-3 text-center text-sm font-medium text-cream"
+              className="mt-2 rounded-full bg-charcoal py-3 text-center text-sm font-medium text-cream"
             >
               Order Custom
             </Link>

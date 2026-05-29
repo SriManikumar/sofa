@@ -77,7 +77,7 @@ export function ContactForm({ defaultOrderType = "" }: { defaultOrderType?: stri
       data-netlify="true"
       data-netlify-honeypot="bot-field"
       onSubmit={handleSubmit}
-      className="rounded-2xl border border-border bg-white p-6 shadow-sm sm:p-8"
+      className="rounded-2xl border border-border/80 bg-white p-6 shadow-sm ring-1 ring-border/40 sm:p-8"
     >
       <input type="hidden" name="form-name" value={FORM_NAME} />
       <p className="hidden" aria-hidden="true">
@@ -259,7 +259,7 @@ export function ContactForm({ defaultOrderType = "" }: { defaultOrderType?: stri
       <button
         type="submit"
         disabled={submitting}
-        className="mt-6 w-full rounded-full bg-accent py-3.5 text-sm font-semibold text-white transition-colors hover:bg-accent-dark disabled:cursor-not-allowed disabled:opacity-70 sm:w-auto sm:px-10"
+        className="mt-6 w-full rounded-full bg-accent py-3.5 text-sm font-semibold text-white shadow-lg shadow-accent/20 transition-colors hover:bg-accent-dark disabled:cursor-not-allowed disabled:opacity-70 sm:w-auto sm:px-10"
       >
         {submitting ? "Sending…" : "Submit custom order request"}
       </button>

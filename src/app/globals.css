@@ -1,16 +1,21 @@
 @import "tailwindcss";
 
 :root {
-  --background: #faf7f2;
-  --foreground: #2c2419;
-  --cream: #faf7f2;
-  --cream-dark: #f0ebe3;
-  --brown: #3d2b1f;
-  --brown-light: #5c4a3a;
-  --accent: #b87333;
-  --accent-dark: #9a5f28;
-  --muted: #7a6f63;
-  --border: #e5ddd2;
+  --background: #f8f5f0;
+  --foreground: #1c1917;
+  --cream: #f8f5f0;
+  --cream-dark: #efe9df;
+  --charcoal: #1c1917;
+  --charcoal-soft: #292524;
+  --brown: #292524;
+  --brown-light: #44403c;
+  --gold: #c9a962;
+  --gold-light: #e8d5a3;
+  --champagne: #f5ecd7;
+  --accent: #b8956a;
+  --accent-dark: #9a7b52;
+  --muted: #78716c;
+  --border: #e7e0d5;
 }
 
 @theme inline {
@@ -18,8 +23,13 @@
   --color-foreground: var(--foreground);
   --color-cream: var(--cream);
   --color-cream-dark: var(--cream-dark);
+  --color-charcoal: var(--charcoal);
+  --color-charcoal-soft: var(--charcoal-soft);
   --color-brown: var(--brown);
   --color-brown-light: var(--brown-light);
+  --color-gold: var(--gold);
+  --color-gold-light: var(--gold-light);
+  --color-champagne: var(--champagne);
   --color-accent: var(--accent);
   --color-accent-dark: var(--accent-dark);
   --color-muted: var(--muted);
@@ -36,4 +46,35 @@ body {
 
 .font-display {
   font-family: var(--font-playfair), Georgia, serif;
+}
+
+.page-gradient {
+  background: linear-gradient(
+    180deg,
+    var(--champagne) 0%,
+    var(--cream) 40%,
+    var(--background) 100%
+  );
+}
+
+.hero-gradient {
+  background: linear-gradient(
+    135deg,
+    var(--charcoal) 0%,
+    #2a2520 45%,
+    #3d3428 100%
+  );
+}
+
+.card-lift {
+  transition:
+    transform 0.35s ease,
+    box-shadow 0.35s ease;
+}
+
+.card-lift:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 20px 40px -12px rgb(28 25 23 / 0.12),
+    0 0 0 1px rgb(201 169 98 / 0.15);
 }

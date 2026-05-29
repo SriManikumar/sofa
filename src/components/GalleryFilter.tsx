@@ -6,7 +6,7 @@ import { galleryItems, type GalleryItem } from "@/data/gallery";
 
 type Filter = "All" | GalleryItem["category"];
 
-const filters: Filter[] = ["All", "Workshop", "Finished", "Detail"];
+const filters: Filter[] = ["All", "Finished", "Workshop", "Detail"];
 
 export function GalleryFilter() {
   const [active, setActive] = useState<Filter>("All");
@@ -24,18 +24,18 @@ export function GalleryFilter() {
             key={filter}
             type="button"
             onClick={() => setActive(filter)}
-            className={`rounded-full px-5 py-2 text-sm font-medium transition-colors ${
+            className={`rounded-full px-5 py-2.5 text-sm font-medium transition-all ${
               active === filter
-                ? "bg-brown text-cream"
-                : "border border-border bg-white text-brown-light hover:border-accent hover:text-accent"
+                ? "bg-charcoal text-cream shadow-md"
+                : "border border-border bg-white text-brown-light hover:border-gold hover:text-accent"
             }`}
           >
             {filter}
           </button>
         ))}
       </div>
-      <div className="mt-10">
-        <GalleryGrid items={filtered} columns={4} />
+      <div className="mt-12">
+        <GalleryGrid items={filtered} columns={3} layout="masonry" />
       </div>
     </>
   );

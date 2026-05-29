@@ -8,7 +8,6 @@ export const site = {
   email: "info@sreerecliners.com",
   address: "Bachupally, Nizampet, Hyderabad",
   hours: "Mon–Sat: 9:00 AM – 6:00 PM",
-  yearsInBusiness: "25+",
   social: {
     instagram: "https://instagram.com",
     facebook: "https://facebook.com",
@@ -17,8 +16,8 @@ export const site = {
 } as const;
 
 export const trustSignals = [
-  { label: `${site.yearsInBusiness} years`, detail: "of craftsmanship" },
-  { label: "Custom orders", detail: "any size & fabric" },
-  { label: "Quality materials", detail: "solid frames & foam" },
+  { label: "Family-crafted quality", detail: "made in our workshop" },
+  { label: "Custom orders welcome", detail: "any size & fabric" },
+  { label: "Premium materials", detail: "solid frames & foam" },
   { label: "Free quotes", detail: "within 24 hours" },
 ] as const;
