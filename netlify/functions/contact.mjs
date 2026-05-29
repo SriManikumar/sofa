@@ -7,14 +7,27 @@
 let ordersStorage = [];
 
 export default async (event, context) => {
+  const headers = {
+    "Content-Type": "application/json",
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type",
+  };
+
+  // Handle OPTIONS (preflight) requests
+  if (event.httpMethod === "OPTIONS") {
+    return {
+      statusCode: 200,
+      headers,
+      body: "OK",
+    };
+  }
+
   // Handle GET requests - return stored orders (for admin dashboard)
   if (event.httpMethod === "GET") {
     return {
       statusCode: 200,
-      headers: {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
-      },
+      headers,
       body: JSON.stringify({
         success: true,
         orders: ordersStorage,
@@ -27,12 +40,23 @@ export default async (event, context) => {
   if (event.httpMethod !== "POST") {
     return {
       statusCode: 405,
+      headers,
       body: JSON.stringify({ error: "Method not allowed" }),
     };
   }
 
   try {
-    const body = event.body ? JSON.parse(event.body) : event.queryStringParameters;
+    let body;
+    try {
+      body = event.body ? JSON.parse(event.body) : {};
+    } catch (parseError) {
+      console.error("JSON parse error:", parseError);
+      return {
+        statusCode: 400,
+        headers,
+        body: JSON.stringify({ error: "Invalid JSON in request body" }),
+      };
+    }
 
     const {
       name,
@@ -47,13 +71,22 @@ export default async (event, context) => {
       message,
     } = body;
 
+    // Validate required fields
+    if (!name || !phone || !orderType) {
+      return {
+        statusCode: 400,
+        headers,
+        body: JSON.stringify({ error: "Missing required fields: name, phone, orderType" }),
+      };
+    }
+
     // Create order object
     const order = {
       id: Date.now(),
       timestamp: new Date().toISOString(),
       status: "pending",
       name,
-      email,
+      email: email || null,
       phone,
       orderType,
       reclinerType: reclinerType || null,
@@ -65,26 +98,18 @@ export default async (event, context) => {
     };
 
     // Store in memory
-    ordersStorage.unshift(order); // Add to beginning
+    ordersStorage.unshift(order);
     
-    // Keep only last 50 orders in memory
+    // Keep only last 50 orders
     if (ordersStorage.length > 50) {
       ordersStorage = ordersStorage.slice(0, 50);
     }
 
-    // Log to Netlify dashboard
-    console.log("✅ NEW ORDER #" + order.id);
-    console.log(`📋 ${order.name} | ${order.orderType}`);
-    console.log(`📞 ${phone} | 📧 ${email}`);
-    console.log(`⏰ ${order.timestamp}`);
-    console.log("---");
+    console.log("✅ ORDER #" + order.id + " from " + name);
 
     return {
       statusCode: 200,
-      headers: {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
-      },
+      headers,
       body: JSON.stringify({
         success: true,
         orderId: order.id,
@@ -92,10 +117,13 @@ export default async (event, context) => {
       }),
     };
   } catch (error) {
-    console.error("❌ Error processing form:", error);
+    console.error("❌ Function error:", error);
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: "Failed to process submission" }),
+      headers,
+      body: JSON.stringify({ 
+        error: "Internal server error: " + (error instanceof Error ? error.message : "Unknown") 
+      }),
     };
   }
 };

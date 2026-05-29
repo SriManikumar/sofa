@@ -34,13 +34,16 @@ export function ContactForm({ defaultOrderType = "" }: { defaultOrderType?: stri
         setSubmitted(true);
         form.reset();
       } else {
+        const errorData = await response.text();
+        console.error("Response error:", response.status, errorData);
         setError(
           "We could not send your request. Please try again or call us directly.",
         );
       }
-    } catch {
+    } catch (err) {
+      console.error("Fetch error:", err);
       setError(
-        "We could not send your request. Check your connection or try again after deploy.",
+        "Network error: " + (err instanceof Error ? err.message : "Unknown error"),
       );
     } finally {
       setSubmitting(false);
