@@ -41,7 +41,10 @@ export function ContactForm({ defaultOrderType = "" }: { defaultOrderType?: stri
           status: "pending",
           ...json,
         };
+        
+        console.log("📋 Storing order:", order);
         ordersStorage.add(order);
+        console.log("✅ Order stored. Total orders:", ordersStorage.get().length);
         
         setSubmitted(true);
         form.reset();

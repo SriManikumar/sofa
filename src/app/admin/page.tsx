@@ -46,6 +46,7 @@ export default function AdminPage() {
     if (password === ADMIN_PASSWORD) {
       setAuthenticated(true);
       const stored = ordersStorage.get();
+      console.log("🔑 Admin login. Retrieved orders from localStorage:", stored);
       setOrders(stored);
       setPassword("");
     } else {
